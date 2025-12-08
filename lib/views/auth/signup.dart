@@ -55,7 +55,6 @@ class _SignUpViewState extends State<SignUpView> {
             ),
             const SizedBox(height: 30),
 
-            // TextField Nama Lengkap (Reusable)
             GoBoxTextField(
               controller: _usernameController,
               labelText: 'Nama Lengkap',
@@ -64,7 +63,6 @@ class _SignUpViewState extends State<SignUpView> {
             ),
             const SizedBox(height: 16),
 
-            // TextField Email (Reusable)
             GoBoxTextField(
               controller: _emailController,
               labelText: 'Email',
@@ -74,7 +72,6 @@ class _SignUpViewState extends State<SignUpView> {
             ),
             const SizedBox(height: 16),
 
-            // TextField Password (Reusable)
             GoBoxTextField(
               controller: _passwordController,
               labelText: 'Password',

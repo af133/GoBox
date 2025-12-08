@@ -42,7 +42,7 @@ class Bnavbar extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.warehouse), label: 'Gudang'),
         BottomNavigationBarItem(icon: Icon(Icons.receipt), label: 'Order'),
         BottomNavigationBarItem(icon: Icon(Icons.chat_bubble), label: 'Chat'),
-        BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Akun'),
+        BottomNavigationBarItem(icon:  Icon(Icons.attach_money), label: 'Saldo'),
       ],
     );
   }

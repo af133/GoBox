@@ -34,6 +34,7 @@ class OrderController {
           'total_penghasilan': data['total_penghasilan'] ?? 0,
           'saldo_tersedia': data['saldo_tersedia'] ?? 0,
           'orderanNow': data['orderanNow'] ?? [],
+          'orderAll': data['orderAll'] ?? [],
         };
       } else {
         debugPrint('Failed to load dashboard: ${response.statusCode}');
@@ -42,6 +43,7 @@ class OrderController {
           'total_penghasilan': 0,
           'saldo_tersedia': 0,
           'orderanNow': [],
+          'orderAll': [],
         };
       }
     } catch (e) {
@@ -51,6 +53,7 @@ class OrderController {
         'total_penghasilan': 0,
         'saldo_tersedia': 0,
         'orderanNow': [],
+        'orderAll': [],
       };
     }
   }

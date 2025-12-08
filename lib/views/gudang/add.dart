@@ -26,7 +26,6 @@ class _AddItemFormState extends State<AddItemForm> {
   File? pickedImage;
   String? imageError;
 
-  // PICK IMAGE
   Future<void> pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (image != null) {
@@ -47,8 +46,6 @@ class _AddItemFormState extends State<AddItemForm> {
       });
     }
   }
-
-  // SUBMIT FORM
   void submit() {
     if (!_formKey.currentState!.validate()) return;
 
@@ -63,7 +60,6 @@ class _AddItemFormState extends State<AddItemForm> {
     if (widget.type == "gudang") {
       data = {
         "nama_lokasi": nameController.text,
-        "alamat": addressController.text,
         "deskripsi": descController.text,
         "path_area": pickedImage,
       };
@@ -101,15 +97,6 @@ class _AddItemFormState extends State<AddItemForm> {
               ),
               const SizedBox(height: 12),
 
-              // Alamat dan Deskripsi (hanya lokasi)
-              if (widget.type == "gudang")
-                TextFormField(
-                  controller: addressController,
-                  decoration: InputDecoration(
-                    labelText: "Alamat",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
               if (widget.type == "gudang") const SizedBox(height: 12),
               if (widget.type == "gudang")
                 TextFormField(
@@ -121,7 +108,6 @@ class _AddItemFormState extends State<AddItemForm> {
                 ),
               if (widget.type == "gudang") const SizedBox(height: 12),
 
-              // Gambar lokasi
               if (widget.type == "gudang")
                 GestureDetector(
                   onTap: pickImage,
@@ -147,7 +133,6 @@ class _AddItemFormState extends State<AddItemForm> {
                 ),
               if (widget.type == "gudang") const SizedBox(height: 12),
 
-              // Harga sewa (hanya harga barang)
               if (widget.type == "harga")
                 TextFormField(
                   controller: priceController,

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;    
+import 'dart:convert';                      
 
 class LocationService {
   static Future<bool> requestPermission(BuildContext context) async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Hidupkan GPS untuk melanjutkan")),
       );
@@ -37,10 +38,26 @@ class LocationService {
     return true;
   }
 
-  /// Mendapatkan posisi user (opsional)
   static Future<Position> getPosition() async {
     return await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
+  }
+
+  static Future<String> getAddressFromLatLng(double lat, double lng) async {
+    final url = Uri.parse(
+      "https://nominatim.openstreetmap.org/reverse?format=json&lat=$lat&lon=$lng&zoom=18&addressdetails=1",
+    );
+
+    final res = await http.get(url, headers: {
+      "User-Agent": "com.gobox.app", 
+    });
+
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      return data["display_name"] ?? "Alamat tidak ditemukan";
+    } else {
+      return "Alamat tidak ditemukan";
+    }
   }
 }

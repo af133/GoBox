@@ -95,8 +95,6 @@ class _LoginViewState extends State<LoginView> {
                 );
 
                 setState(() => message = result);
-
-                // ✅ Jika login berhasil, langsung ke HomePage
                 if (result.contains('berhasil')) {
                   await Future.delayed(const Duration(seconds: 1));
                   if (mounted) {
@@ -112,7 +110,6 @@ class _LoginViewState extends State<LoginView> {
             ),
             const SizedBox(height: 20),
 
-            // Link ke halaman SignUp
             GoBoxTextLink(
               text: 'Belum punya akun? Daftar sekarang',
               onPressed: () {
@@ -124,7 +121,6 @@ class _LoginViewState extends State<LoginView> {
             ),
             const SizedBox(height: 20),
 
-            // Pesan error / sukses
             if (message.isNotEmpty && message != 'berhasil')
               AuthMessage(message: message),
           ],

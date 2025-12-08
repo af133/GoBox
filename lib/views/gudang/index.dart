@@ -1,9 +1,10 @@
-import 'dart:io'; // Penting untuk File
+import 'dart:io'; 
 import 'package:flutter/material.dart';
 import 'package:gobox/controllers/gudang.dart';
 import 'package:gobox/controllers/auth.dart';
 import 'package:gobox/views/widgets/bnavbar.dart';
 import 'add.dart';
+import 'update.dart';
 import 'detail.dart';
 class ManajemenGudangPage extends StatefulWidget {
   const ManajemenGudangPage({super.key});
@@ -85,7 +86,7 @@ class _ManajemenGudangPageState extends State<ManajemenGudangPage> {
             context,
             MaterialPageRoute(
               builder: (_) => AddItemForm(
-                type: filter, // "gudang" atau "harga"
+                type: filter, 
                 onSubmit: (data) async {
                   final controller = ManagemenGudang();
                   bool success = false;
@@ -183,8 +184,8 @@ class _ManajemenGudangPageState extends State<ManajemenGudangPage> {
           setState(() {
             filter = name;
           });
-          await loadData(); // load ulang data sesuai filter
-          filterSearch(); // apply search jika ada text
+          await loadData(); 
+          filterSearch(); 
         }
       },
       style: ElevatedButton.styleFrom(
@@ -242,6 +243,21 @@ Widget gudangCard(dynamic item) {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
+         onTap: () {
+         Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EditItemForm(
+              type: 'harga',
+              initialData: item,
+              idUser: idUser,
+               onUpdate: () async {
+                await loadData(); 
+              },
+            ),
+          ),
+        );
+      },
         title: Text(
           item['jenis_barang'] ?? '-',
           style: const TextStyle(fontWeight: FontWeight.bold),

@@ -21,92 +21,70 @@ class ManagemenGudang {
         'Accept': 'application/json',
       };
 
-  // ============================================================
-  // GET LOKASI GUDANG MITRA
-  // ============================================================
-  Future<List<dynamic>> getLokasiMitra(String idUser) async {
+  
+  // GET LOKASI DETAIL
+  
+  Future<Map<String, dynamic>?> getLokasiDetail(String idLokasi) async {
     await _loadToken();
-    final response = await http.post(
-      Uri.parse('$baseUrl/show/mitra/lokasi'),
+    final response = await http.get(
+      Uri.parse('$baseUrl/lokasi/$idLokasi'),
       headers: _headers(),
-      body: {'id_mitra': idUser},
     );
-    final data = jsonDecode(response.body);
-    return data['lokasi'] ?? [];
-  }
-
-  // ============================================================
-  // GET JENIS BARANG + HARGA
-  // ============================================================
-  Future<List<dynamic>> getJenisBarang(String idUser) async {
-    await _loadToken();
-    final response = await http.post(
-      Uri.parse('$baseUrl/jenis/barang'),
-      headers: _headers(),
-      body: {'id_mitra': idUser},
-    );
-    final data = jsonDecode(response.body);
-    return data['jenisBarang'] ?? [];
-  }
-
-  // ============================================================
-  // ADD LOKASI MITRA (DENGAN GAMBAR)
-  // ============================================================
-  Future<bool> addLokasiMitra({
-    required String idMitra,
-    required String namaLokasi,
-    required String deskripsi,
-    required File imageFile,
-  }) async {
-    await _loadToken();
-
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$baseUrl/add/mitra/lokasi'),
-    );
-
-    request.headers.addAll(_headers());
-
-    request.fields['id_mitra'] = idMitra;
-    request.fields['nama_lokasi'] = namaLokasi;
-    request.fields['deskripsi'] = deskripsi;
-
-    request.files.add(await http.MultipartFile.fromPath(
-      'path_area', // harus sama dengan Laravel
-      imageFile.path,
-    ));
-
-    var response = await request.send();
-    var respStr = await response.stream.bytesToString();
 
     if (response.statusCode == 200) {
-      print("Upload berhasil: $respStr");
-      return true;
+      return json.decode(response.body);
     } else {
-      print("Upload gagal: Status ${response.statusCode}, Body: $respStr");
-      return false;
+      print('Error getLokasiDetail: ${response.statusCode}, ${response.body}');
+      return null;
     }
   }
 
-  // ============================================================
-  // ADD POLYGON
-  // ============================================================
-  Future<bool> addPolygon({
-    required String idLokasi,
-    required String polygonJson,
-  }) async {
-    await _loadToken();
-    final response = await http.post(
-      Uri.parse('$baseUrl/add/polygon'),
-      headers: _headers(),
-      body: {'id_lokasi': idLokasi, 'polygon': polygonJson},
-    );
-    return response.statusCode == 200;
-  }
+  
+  // UPDATE TITIK LOKASI + POLYGON
+  
+ Future<bool> updateLokasiAndPolygon({
+  required String idLokasi,
+  required String latitude,
+  required String longitude,
+  required List<Map<String, dynamic>> polygons,
+}) async {
+  await _loadToken();
 
-  // ============================================================
-  // UPDATE LOKASI MITRA
-  // ============================================================
+  try {
+    final url = Uri.parse('$baseUrl/update/or/add/titik/polygon');
+
+    final body = jsonEncode({
+      "id_lokasi": idLokasi,
+      "latitude": latitude,
+      "longitude": longitude,
+      "polygons": polygons,
+    });
+
+    final res = await http.post(
+      url,
+      headers: {
+        ..._headers(),
+        "Content-Type": "application/json",
+      },
+      body: body,
+    );
+
+    print("Response updateLokasiAndPolygon: ${res.statusCode}");
+    print("Body: ${res.body}");
+
+    return res.statusCode == 200;
+  } catch (e) {
+    print("Error updateLokasiAndPolygon: $e");
+    return false;
+  }
+}
+
+
+
+
+  
+  // UPDATE LOKASI SAJA
+  
   Future<bool> updateLokasi({
     required String idLokasi,
     String? namaLokasi,
@@ -135,14 +113,68 @@ class ManagemenGudang {
     }
 
     var res = await request.send();
-    var respStr = await res.stream.bytesToString();
-    print("Update Lokasi Response: $respStr");
     return res.statusCode == 200;
   }
 
-  // ============================================================
-  // ADD JENIS BARANG (harga mitra)
-  // ============================================================
+
+  
+  // GET LOKASI GUDANG MITRA
+  
+  Future<List<dynamic>> getLokasiMitra(String idUser) async {
+    await _loadToken();
+    final response = await http.post(
+      Uri.parse('$baseUrl/show/mitra/lokasi'),
+      headers: _headers(),
+      body: {'id_mitra': idUser},
+    );
+    final data = jsonDecode(response.body);
+    return data['lokasi'] ?? [];
+  }
+
+  
+  // ADD LOKASI MITRA
+  
+  Future<bool> addLokasiMitra({
+    required String idMitra,
+    required String namaLokasi,
+    required String deskripsi,
+    required File imageFile,
+  }) async {
+    await _loadToken();
+
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/add/mitra/lokasi'),
+    );
+
+    request.headers.addAll(_headers());
+    request.fields['id_mitra'] = idMitra;
+    request.fields['nama_lokasi'] = namaLokasi;
+    request.fields['deskripsi'] = deskripsi;
+
+    request.files.add(await http.MultipartFile.fromPath('path_area', imageFile.path));
+
+    var response = await request.send();
+    var respStr = await response.stream.bytesToString();
+
+    if (response.statusCode == 200) {
+      print("Upload berhasil: $respStr");
+      return true;
+    } else {
+      print("Upload gagal: Status ${response.statusCode}, Body: $respStr");
+      return false;
+    }
+  }
+   Future<List<dynamic>> getJenisBarang(String idUser) async {
+    await _loadToken();
+    final response = await http.post(
+      Uri.parse('$baseUrl/jenis/barang'),
+      headers: _headers(),
+      body: {'id_mitra': idUser},
+    );
+    final data = jsonDecode(response.body);
+    return data['jenisBarang'] ?? [];
+  }
   Future<bool> addJenisBarang({
     required String idMitra,
     required String jenisBarang,
@@ -156,35 +188,56 @@ class ManagemenGudang {
     );
     return response.statusCode == 200;
   }
-
-  // ============================================================
-  // UPDATE JENIS BARANG (harga mitra)
-  // ============================================================
-  Future<bool> updateJenisBarang({
-    required String idHargaMitra,
+  Future<bool> editJenisBarang({
+    required String jenisBarang,
     required String hargaSewa,
+    required String idJenisBarang,
   }) async {
     await _loadToken();
-    final response = await http.post(
-      Uri.parse('$baseUrl/update/jenis/barang'),
-      headers: _headers(),
-      body: {'id_harga_mitra': idHargaMitra, 'harga_sewa': hargaSewa},
-    );
-    return response.statusCode == 200;
-  }
-  Future<Map<String, dynamic>?> getLokasiDetail(String idLokasi) async {
-  await _loadToken();
-  final response = await http.get(
-    Uri.parse('$baseUrl/lokasi/$idLokasi'),
-    headers: _headers(),
-  );
+      final response = await http.post(
+        Uri.parse('$baseUrl/update/jenis/barang'),
+        headers: _headers(),
+        body: {'id_jenis_barang':idJenisBarang, 'jenis_barang': jenisBarang, 'harga_sewa': hargaSewa},
+      );
+      if (response.statusCode == 200) {
+        return true;
+      }
+      else{
+        return false;
 
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    print('Error getLokasiDetail: ${response.statusCode}, ${response.body}');
-    return null;
+      }
   }
-}
+  Future<bool> updateOrAddLokasiAndPolygon({
+    required String idLokasi,
+    required String latitude,
+    required String longitude,
+    required List<Map<String, dynamic>> polygons, 
+  }) async {
+    await _loadToken();
+    try {
+      final url = Uri.parse('$baseUrl/update/or/add/titik/polygon');
+      final body = jsonEncode({
+        'id_lokasi': idLokasi,
+        'latitude': latitude,
+        'longitude': longitude,
+        'polygons': polygons,
+      });
+
+      final res = await http.post(
+        url,
+        headers: {
+          ..._headers(),
+          'Content-Type': 'application/json',
+        },
+        body: body,
+      );
+
+      print('Response updateOrAddLokasiAndPolygon: ${res.statusCode}, ${res.body}');
+      return res.statusCode == 200;
+    } catch (e) {
+      print('Error updateOrAddLokasiAndPolygon: $e');
+      return false;
+    }
+  }
 
 }

@@ -191,7 +191,6 @@ class _DashboardState extends State<Dashboard> {
               ),
               const SizedBox(width: 12),
 
-              // LEFT TEXT SECTION
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,7 +217,6 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ),
 
-              // STATUS
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [

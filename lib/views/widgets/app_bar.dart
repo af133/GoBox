@@ -89,5 +89,5 @@ class AppbarHome extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(60); // Lebih ringkas
+  Size get preferredSize => const Size.fromHeight(60);
 }
