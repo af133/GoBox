@@ -3,6 +3,7 @@ import 'package:gobox/views/auth/login.dart';
 import 'package:gobox/views/auth/signup.dart';
 import 'package:gobox/views/dashboard.dart';
 import 'package:gobox/views/splash_page.dart';
+import 'package:gobox/views/gudang/index.dart';
 
 class AppRoutes {
   static const splash = '/';
@@ -10,7 +11,7 @@ class AppRoutes {
   static const login = '/login';
   static const signup = '/signup';
   static const profil = '/profile';
-  static const allmitra = '/all_mitra';
+  static const gudang = '/gudang';
   static const detailmitra = '/detail_mitra';
   static const ordermitra = '/order_form';
 
@@ -19,5 +20,7 @@ class AppRoutes {
     login: (_) => LoginView(),
     signup: (_) => SignUpView(),
     home:(_) => Dashboard(),
+    gudang:(_) => ManajemenGudangPage(),
+
   };
 }

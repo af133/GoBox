@@ -14,7 +14,6 @@ class _DashboardState extends State<Dashboard> {
   String idUser = '';
   String? nama ;
   String? pathProfil;
-  bool isLoading = true;
   Map<String, dynamic>? dashboardData;
 
   @override
@@ -44,17 +43,12 @@ class _DashboardState extends State<Dashboard> {
 
     setState(() {
       dashboardData = data;
-      isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
+    
 
     return Scaffold(
       appBar: AppbarHome(
@@ -109,7 +103,7 @@ class _DashboardState extends State<Dashboard> {
           ],
         ),
       ),
-      bottomNavigationBar: Bnavbar(),
+      bottomNavigationBar: Bnavbar(currentIndex: 0,),
     );
   }
 

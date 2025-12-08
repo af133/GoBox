@@ -5,6 +5,7 @@ class LocationService {
   static Future<bool> requestPermission(BuildContext context) async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Hidupkan GPS untuk melanjutkan")),
       );

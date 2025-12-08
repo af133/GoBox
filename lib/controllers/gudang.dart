@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,23 +17,20 @@ class ManagemenGudang {
   }
 
   Map<String, String> _headers() => {
-        'Authorization': 'Bearer $token',
+        if (token != null) 'Authorization': 'Bearer $token',
         'Accept': 'application/json',
       };
 
   // ============================================================
   // GET LOKASI GUDANG MITRA
   // ============================================================
-  Future<List<dynamic>> 
-    jogetLokasiMitra(String idMitra) async {
+  Future<List<dynamic>> getLokasiMitra(String idUser) async {
     await _loadToken();
-
     final response = await http.post(
-      Uri.parse('$baseUrl/show/lokasi/mitra'),
+      Uri.parse('$baseUrl/show/mitra/lokasi'),
       headers: _headers(),
-      body: {'id_mitra': idMitra},
+      body: {'id_mitra': idUser},
     );
-
     final data = jsonDecode(response.body);
     return data['lokasi'] ?? [];
   }
@@ -40,15 +38,13 @@ class ManagemenGudang {
   // ============================================================
   // GET JENIS BARANG + HARGA
   // ============================================================
-  Future<List<dynamic>> getJenisBarang(String idLokasi) async {
+  Future<List<dynamic>> getJenisBarang(String idUser) async {
     await _loadToken();
-
     final response = await http.post(
       Uri.parse('$baseUrl/jenis/barang'),
       headers: _headers(),
-      body: {'id_lokasi': idLokasi},
+      body: {'id_mitra': idUser},
     );
-
     final data = jsonDecode(response.body);
     return data['jenisBarang'] ?? [];
   }
@@ -60,15 +56,13 @@ class ManagemenGudang {
     required String idMitra,
     required String namaLokasi,
     required String deskripsi,
-    required String latitude,
-    required String longitude,
-    required String imagePath,
+    required File imageFile,
   }) async {
     await _loadToken();
 
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('$baseUrl/add/lokasi/mitra'),
+      Uri.parse('$baseUrl/add/mitra/lokasi'),
     );
 
     request.headers.addAll(_headers());
@@ -76,13 +70,22 @@ class ManagemenGudang {
     request.fields['id_mitra'] = idMitra;
     request.fields['nama_lokasi'] = namaLokasi;
     request.fields['deskripsi'] = deskripsi;
-    request.fields['latitude'] = latitude;
-    request.fields['longitude'] = longitude;
 
-    request.files.add(await http.MultipartFile.fromPath('path_area', imagePath));
+    request.files.add(await http.MultipartFile.fromPath(
+      'path_area', // harus sama dengan Laravel
+      imageFile.path,
+    ));
 
-    var result = await request.send();
-    return result.statusCode == 200;
+    var response = await request.send();
+    var respStr = await response.stream.bytesToString();
+
+    if (response.statusCode == 200) {
+      print("Upload berhasil: $respStr");
+      return true;
+    } else {
+      print("Upload gagal: Status ${response.statusCode}, Body: $respStr");
+      return false;
+    }
   }
 
   // ============================================================
@@ -93,16 +96,11 @@ class ManagemenGudang {
     required String polygonJson,
   }) async {
     await _loadToken();
-
     final response = await http.post(
       Uri.parse('$baseUrl/add/polygon'),
       headers: _headers(),
-      body: {
-        'id_lokasi': idLokasi,
-        'polygon': polygonJson,
-      },
+      body: {'id_lokasi': idLokasi, 'polygon': polygonJson},
     );
-
     return response.statusCode == 200;
   }
 
@@ -115,7 +113,7 @@ class ManagemenGudang {
     String? deskripsi,
     String? latitude,
     String? longitude,
-    String? imagePath,
+    File? imageFile,
   }) async {
     await _loadToken();
 
@@ -125,18 +123,20 @@ class ManagemenGudang {
     );
 
     request.headers.addAll(_headers());
-
     request.fields['id_lokasi'] = idLokasi;
+
     if (namaLokasi != null) request.fields['nama_lokasi'] = namaLokasi;
     if (deskripsi != null) request.fields['deskripsi'] = deskripsi;
     if (latitude != null) request.fields['latitude'] = latitude;
     if (longitude != null) request.fields['longitude'] = longitude;
 
-    if (imagePath != null) {
-      request.files.add(await http.MultipartFile.fromPath('path_area', imagePath));
+    if (imageFile != null) {
+      request.files.add(await http.MultipartFile.fromPath('path_area', imageFile.path));
     }
 
     var res = await request.send();
+    var respStr = await res.stream.bytesToString();
+    print("Update Lokasi Response: $respStr");
     return res.statusCode == 200;
   }
 
@@ -145,21 +145,15 @@ class ManagemenGudang {
   // ============================================================
   Future<bool> addJenisBarang({
     required String idMitra,
-    required String idJenisBarang,
+    required String jenisBarang,
     required String hargaSewa,
   }) async {
     await _loadToken();
-
     final response = await http.post(
       Uri.parse('$baseUrl/add/jenis/barang'),
       headers: _headers(),
-      body: {
-        'id_mitra': idMitra,
-        'id_jenis_barang': idJenisBarang,
-        'harga_sewa': hargaSewa,
-      },
+      body: {'id_mitra': idMitra, 'jenis_barang': jenisBarang, 'harga_sewa': hargaSewa},
     );
-
     return response.statusCode == 200;
   }
 
@@ -171,16 +165,26 @@ class ManagemenGudang {
     required String hargaSewa,
   }) async {
     await _loadToken();
-
     final response = await http.post(
       Uri.parse('$baseUrl/update/jenis/barang'),
       headers: _headers(),
-      body: {
-        'id_harga_mitra': idHargaMitra,
-        'harga_sewa': hargaSewa,
-      },
+      body: {'id_harga_mitra': idHargaMitra, 'harga_sewa': hargaSewa},
     );
-
     return response.statusCode == 200;
   }
+  Future<Map<String, dynamic>?> getLokasiDetail(String idLokasi) async {
+  await _loadToken();
+  final response = await http.get(
+    Uri.parse('$baseUrl/lokasi/$idLokasi'),
+    headers: _headers(),
+  );
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    print('Error getLokasiDetail: ${response.statusCode}, ${response.body}');
+    return null;
+  }
+}
+
 }

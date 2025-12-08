@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:gobox/routes/routes.dart';
 
 class Bnavbar extends StatelessWidget {
-  const Bnavbar({super.key});
+  final int currentIndex; // Tambahkan ini
+
+  const Bnavbar({super.key, required this.currentIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -12,13 +14,16 @@ class Bnavbar extends StatelessWidget {
       selectedItemColor: goBox,
       unselectedItemColor: Colors.grey.shade600,
       backgroundColor: Colors.white,
+
+      currentIndex: currentIndex, // SET INDEX AKTIF
+
       onTap: (index) {
         switch (index) {
           case 0:
             Navigator.pushReplacementNamed(context, AppRoutes.home);
             break;
           case 1:
-            // Navigator.pushReplacementNamed(context, AppRoutes.gudang);
+            Navigator.pushReplacementNamed(context, AppRoutes.gudang);
             break;
           case 2:
             // Navigator.pushReplacementNamed(context, AppRoutes.order);
@@ -31,6 +36,7 @@ class Bnavbar extends StatelessWidget {
             break;
         }
       },
+
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.warehouse), label: 'Gudang'),
