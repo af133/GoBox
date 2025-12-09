@@ -4,6 +4,7 @@ import 'package:gobox/views/auth/signup.dart';
 import 'package:gobox/views/dashboard.dart';
 import 'package:gobox/views/splash_page.dart';
 import 'package:gobox/views/gudang/index.dart';
+import 'package:gobox/views/order/index.dart';
 
 class AppRoutes {
   static const splash = '/';
@@ -12,7 +13,7 @@ class AppRoutes {
   static const signup = '/signup';
   static const profil = '/profile';
   static const gudang = '/gudang';
-  static const detailmitra = '/detail_mitra';
+  static const listOrder = '/order';
   static const ordermitra = '/order_form';
 
   static Map<String, WidgetBuilder> routes = {
@@ -21,6 +22,7 @@ class AppRoutes {
     signup: (_) => SignUpView(),
     home:(_) => Dashboard(),
     gudang:(_) => ManajemenGudangPage(),
+    listOrder:(_) => OrderListPage(),
 
   };
 }

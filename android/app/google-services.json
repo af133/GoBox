@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "22154943236",
+    "project_id": "gobox-8ffa8",
+    "storage_bucket": "gobox-8ffa8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:22154943236:android:e5a3d47ac5740273364e51",
+        "android_client_info": {
+          "package_name": "com.gobox.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDT-VYxw1uP-VLbagkvB9EQ1VLBlxtwJ2U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

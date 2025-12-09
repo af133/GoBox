@@ -15,6 +15,7 @@ class _DashboardState extends State<Dashboard> {
   String? nama ;
   String? pathProfil;
   Map<String, dynamic>? dashboardData;
+  bool loading = true;
 
   @override
   void initState() {

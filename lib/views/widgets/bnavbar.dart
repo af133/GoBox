@@ -15,7 +15,7 @@ class Bnavbar extends StatelessWidget {
       unselectedItemColor: Colors.grey.shade600,
       backgroundColor: Colors.white,
 
-      currentIndex: currentIndex, // SET INDEX AKTIF
+      currentIndex: currentIndex, 
 
       onTap: (index) {
         switch (index) {
@@ -26,7 +26,7 @@ class Bnavbar extends StatelessWidget {
             Navigator.pushReplacementNamed(context, AppRoutes.gudang);
             break;
           case 2:
-            // Navigator.pushReplacementNamed(context, AppRoutes.order);
+            Navigator.pushReplacementNamed(context, AppRoutes.listOrder);
             break;
           case 3:
             // Navigator.pushReplacementNamed(context, AppRoutes.chat);
