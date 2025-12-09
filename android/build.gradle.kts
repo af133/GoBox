@@ -4,8 +4,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:8.1.0") // sesuaikan versi
-        classpath("com.google.gms:google-services:4.4.4")   // <-- Tambahkan ini
+        classpath("com.android.tools.build:gradle:8.1.0") 
+        classpath("com.google.gms:google-services:4.4.4") 
     }
 }
 allprojects {
@@ -13,9 +13,6 @@ allprojects {
         google()
         mavenCentral()
     }
-}
-plugins {
-    id("com.google.gms.google-services") version "4.4.4" apply false
 }
 
 val newBuildDir: Directory =
