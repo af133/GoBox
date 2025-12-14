@@ -1,7 +1,6 @@
 import 'dart:async';
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:gobox/shared/constants.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -12,8 +11,6 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage>
     with SingleTickerProviderStateMixin {
-  static const Color darkGrey = Color(0xFF616161);
-
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
   late Animation<double> _scaleAnimation;
@@ -36,15 +33,17 @@ class _SplashPageState extends State<SplashPage>
       begin: 0.8,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
     _controller.forward();
-    Timer(const Duration(seconds: 3), () {
+
+    Timer(const Duration(seconds: 5), () {
       checkLoginStatus();
     });
   }
 
   Future<void> checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
+    final token = prefs.getString('token');
 
     if (!mounted) return;
 
@@ -63,67 +62,49 @@ class _SplashPageState extends State<SplashPage>
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
+      body: Stack(
         children: [
           Expanded(
-            child: Center(
-              child: FadeTransition(
-                opacity: _opacityAnimation,
-                child: ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'asset/logo.png',
-                        width: 400,
-                        height: 400,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Penyimpanan Barang Aman & Murah',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: goBox,
-                        ),
-                      ),
-                    ],
-                  ),
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('asset/splass.png'),
+                  fit: BoxFit.cover,
                 ),
               ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(bottom: screenHeight * 0.05, top: 15),
-            child: FadeTransition(
-              opacity: _opacityAnimation,
-              child: Column(
-                children: [
-                  const Text(
-                    'from',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: darkGrey,
-                      fontWeight: FontWeight.w400,
+
+              child: Center(
+                child: FadeTransition(
+                  opacity: _opacityAnimation,
+                  child: ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'asset/splashscreen.png',
+                          width: size.width * 0.76,
+                          height: size.height * 0.76,
+                          fit: BoxFit.contain,
+                        ),
+                        const Text(
+                          'GoBox',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 255, 255, 255),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'GoBox',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: goBox,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

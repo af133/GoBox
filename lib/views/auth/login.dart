@@ -21,110 +21,103 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    const Color darkGrey = Color(0xFF616161);
-
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 60),
-
-            Center(
-              child: SizedBox(
-                height: 200,
-                child: Image.asset('asset/logo.png'),
-              ),
+      body: Stack(
+        children: [
+          // BACKGROUND IMAGE
+          Positioned.fill(
+            child: Image.asset(
+              'asset/background.png',
+              fit: BoxFit.cover,
             ),
-            const SizedBox(height: 40),
+          ),
 
-            // Judul
-            const Text(
-              'Masuk ke Akun Anda',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Masukkan email dan password Anda untuk melanjutkan.',
-              style: TextStyle(
-                fontSize: 16,
-                color: darkGrey,
-              ),
-            ),
-            const SizedBox(height: 30),
+          // CONTENT
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 60),
 
-            // TextField Email
-            GoBoxTextField(
-              controller: _emailController,
-              labelText: 'Email',
-              hintText: 'contoh@email.com',
-              prefixIcon: Icons.email_outlined,
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16),
+                Center(
+                  child: SizedBox(
+                    height: 200,
+                    child: Image.asset('asset/logo.png'),
+                  ),
+                ),
 
-            // TextField Password
-            GoBoxTextField(
-              controller: _passwordController,
-              labelText: 'Password',
-              hintText: 'Minimal 8 karakter',
-              prefixIcon: Icons.lock_outline,
-              isPassword: true,
-              obscureText: _obscureText,
-              onToggleVisibility: () {
-                setState(() {
-                  _obscureText = !_obscureText;
-                });
-              },
-            ),
-            const SizedBox(height: 30),
+                const SizedBox(height: 20),
 
-            // Tombol Login
-            GoBoxElevatedButton(
-              text: 'Masuk',
-              onPressed: () async {
-                final result = await _authController.login(
-                  _emailController.text,
-                  _passwordController.text,
-                );
+                GoBoxTextField(
+                  controller: _emailController,
+                  labelText: 'Email',
+                  hintText: 'contoh@email.com',
+                  prefixIcon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 16),
 
-                setState(() => message = result);
-                if (result.contains('berhasil')) {
-                  await Future.delayed(const Duration(seconds: 1));
-                  if (mounted) {
-                    Navigator.pushReplacement(
-                      // ignore: use_build_context_synchronously
-                      context,
-                      MaterialPageRoute(builder: (_) => const Dashboard()),
-                      
+                GoBoxTextField(
+                  controller: _passwordController,
+                  labelText: 'Password',
+                  hintText: 'Minimal 8 karakter',
+                  prefixIcon: Icons.lock_outline,
+                  isPassword: true,
+                  obscureText: _obscureText,
+                  onToggleVisibility: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                GoBoxElevatedButton(
+                  text: 'Masuk',
+                  onPressed: () async {
+                    final result = await _authController.login(
+                      _emailController.text,
+                      _passwordController.text,
                     );
-                  }
-                }
-              },
-            ),
-            const SizedBox(height: 20),
 
-            GoBoxTextLink(
-              text: 'Belum punya akun? Daftar sekarang',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SignUpView()),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
+                    setState(() => message = result);
+                    if (result.contains('berhasil')) {
+                      await Future.delayed(const Duration(seconds: 1));
+                      if (mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const Dashboard(),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                ),
+                const SizedBox(height: 15),
 
-            if (message.isNotEmpty && message != 'berhasil')
-              AuthMessage(message: message),
-          ],
-        ),
+                GoBoxTextLink(
+                  text: 'Belum punya akun? Daftar sekarang',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SignUpView(),
+                      ),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 5),
+
+                if (message.isNotEmpty && message != 'berhasil')
+                  AuthMessage(message: message),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

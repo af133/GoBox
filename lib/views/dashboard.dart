@@ -1,8 +1,14 @@
+// Dashboard.dart
 import "package:flutter/material.dart";
 import "package:gobox/controllers/order.dart";
 import 'package:gobox/controllers/auth.dart';
+// Pastikan import ini menunjuk ke AppbarHome yang baru Anda modifikasi
 import "package:gobox/views/widgets/app_bar.dart";
 import 'package:gobox/views/widgets/bnavbar.dart';
+
+// Asumsi warna goBox (Hijau Primer GoBox)
+const Color goBox = Color(0xFF4CAF50);
+
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
 
@@ -12,7 +18,7 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   String idUser = '';
-  String? nama ;
+  String? nama;
   String? pathProfil;
   Map<String, dynamic>? dashboardData;
   bool loading = true;
@@ -22,10 +28,15 @@ class _DashboardState extends State<Dashboard> {
     super.initState();
     init();
   }
-  
+
   Future<void> init() async {
     await getUser();
-    await fetchData();
+    if (idUser.isNotEmpty) {
+      await fetchData();
+    }
+    setState(() {
+      loading = false;
+    });
   }
 
   Future<void> getUser() async {
@@ -34,8 +45,8 @@ class _DashboardState extends State<Dashboard> {
 
     setState(() {
       idUser = user.idUser.toString();
-      nama= user.nama;
-      pathProfil= user.pathProfil;
+      nama = user.nama;
+      pathProfil = user.pathProfil;
     });
   }
 
@@ -49,111 +60,190 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    
-
     return Scaffold(
-      appBar: AppbarHome(
-          name: nama ?? 'User' ,
-          pathProfil:pathProfil ,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // CARD TOTAL ORDER
-            buildCard(
-              title: "Total Order",
-              value: dashboardData?['total_orders'].toString() ?? "0",
-              icon: Icons.inventory_2,
-              color: Colors.blue,
-            ),
+      backgroundColor: Colors.grey.shade50,
+      // Panggil AppbarHome yang sudah dimodifikasi
+      appBar: AppbarHome(name: nama ?? 'Mitra', pathProfil: pathProfil),
+      body: loading
+          ? const Center(child: CircularProgressIndicator(color: goBox))
+          : RefreshIndicator(
+              onRefresh: init,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ROW CARD SUMMARY (Menggunakan desain modern yang dibuat sebelumnya)
+                    _buildSummaryCard(context),
 
-            const SizedBox(height: 12),
+                    const SizedBox(height: 20),
 
-            // CARD TOTAL PENGHASILAN
-            buildCard(
-              title: "Total Penghasilan",
-              value: "Rp ${dashboardData?['total_penghasilan'] ?? 0}",
-              icon: Icons.payments,
-              color: Colors.green,
-            ),
+                    // HEADER ORDER TERBARU
+                    Text(
+                      "Order Terbaru",
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
 
-            const SizedBox(height: 12),
-
-            // CARD SALDO TERSISA
-            buildCard(
-              title: "Saldo Tersedia",
-              value: "Rp ${dashboardData?['saldo_tersedia'] ?? 0}",
-              icon: Icons.account_balance_wallet,
-              color: Colors.orange,
-            ),
-
-            const SizedBox(height: 20),
-
-            // ORDERAN NOW LIST
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Order Terbaru",
-                style: Theme.of(context).textTheme.titleMedium,
+                    // LIST ORDER TERBARU
+                    _buildOrderNowList(dashboardData?['orderanNow'] ?? []),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 10),
-
-            buildOrderNowList(dashboardData?['orderanNow'] ?? []),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Bnavbar(currentIndex: 0,),
+      // Panggil Bnavbar yang sudah dimodifikasi (currentIndex: 0 untuk Home)
+      bottomNavigationBar: const Bnavbar(currentIndex: 0),
     );
   }
 
-  Widget buildCard({
+  // --- WIDGET HELPER DASHBOARD (Dipertahankan dari perbaikan sebelumnya) ---
+
+  Widget _buildSummaryCard(BuildContext context) {
+    final totalOrders = dashboardData?['total_orders'].toString() ?? "0";
+    final totalPenghasilan = dashboardData?['total_penghasilan'].toString() ?? "0";
+    final saldoTersedia = dashboardData?['saldo_tersedia'] ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // CARD TOTAL ORDER
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: [goBox.withValues(alpha: 0.05), Colors.white],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.shade300,
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Total Penghasilan",
+                    style: TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    totalPenghasilan,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: goBox,
+                    ),
+                  ),
+                ],
+              ),
+              Icon(
+                Icons.payments_rounded,
+                color: goBox.withValues(alpha: 0.8),
+                size: 40,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        // CARD PENGHASILAN & SALDO
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatsItem(
+                title: "Total Order",
+                value: totalOrders,
+                icon: Icons.shopping_cart_rounded,
+                color: goBox,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildStatsItem(
+                title: "Saldo Tersedia",
+                value: "Rp ${saldoTersedia}",
+                icon: Icons.account_balance_wallet_rounded,
+                color: Colors.orange.shade700,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsItem({
     required String title,
     required String value,
     required IconData icon,
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          )
+            color: color.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            backgroundColor: color.withValues(alpha: 0.15),
-            child: Icon(icon, color: color),
-          ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title,
-                  style: const TextStyle(fontSize: 14, color: Colors.black54)),
-              Text(value,
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+              Icon(icon, color: color.withValues(alpha: 0.7), size: 20),
             ],
-          )
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
   }
 
-  Widget buildOrderNowList(List orders) {
+  Widget _buildOrderNowList(List orders) {
     if (orders.isEmpty) {
-      return const Text(
-        "Belum ada order terbaru",
-        style: TextStyle(fontSize: 14),
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Center(
+          child: Text(
+            "Belum ada order terbaru.",
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+          ),
+        ),
       );
     }
 
@@ -161,37 +251,45 @@ class _DashboardState extends State<Dashboard> {
       children: orders.map((order) {
         final status = order['status'] ?? '-';
 
-        Color statusColor =
-            status.toString().toLowerCase() == "diterima" ? Colors.green : Colors.red;
+        Color statusColor;
+        Color statusBgColor;
+
+        if (status.toString().toLowerCase() == "diterima") {
+          statusColor = Colors.green.shade700;
+          statusBgColor = Colors.green.shade100;
+        } else if (status.toString().toLowerCase() == "pending") {
+          statusColor = Colors.orange.shade700;
+          statusBgColor = Colors.orange.shade100;
+        } else {
+          statusColor = Colors.red.shade700;
+          statusBgColor = Colors.red.shade100;
+        }
 
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 6,
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 8,
                 offset: const Offset(0, 4),
-              )
+              ),
             ],
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ICON
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.1),
+                  color: goBox.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.local_shipping, color: Colors.blue),
+                child: const Icon(Icons.local_shipping_rounded, color: goBox),
               ),
               const SizedBox(width: 12),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,41 +297,38 @@ class _DashboardState extends State<Dashboard> {
                     Text(
                       "Order #${order['id_order'] ?? '-'}",
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 15),
-                    ),
-                    const SizedBox(height: 6),
-
-                    const Text(
-                      'Tanggal Penitipan',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.black54,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
                       ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
-                      order['tanggal_penitipan'] ?? "-",
-                      style: const TextStyle(fontSize: 13),
+                      'Tanggal Penitipan: ${order['tanggal_penitipan'] ?? "-"}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                   ],
                 ),
               ),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text(
-                    "Pembayaran",
-                    style: TextStyle(fontSize: 11, color: Colors.black54),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: statusBgColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  status.toUpperCase(),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: statusColor,
+                    fontSize: 11,
                   ),
-                  Text(
-                    status,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: statusColor,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
@@ -241,5 +336,4 @@ class _DashboardState extends State<Dashboard> {
       }).toList(),
     );
   }
-
 }

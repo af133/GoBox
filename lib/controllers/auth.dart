@@ -3,12 +3,13 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:gobox/model/user.dart';
+import 'http.dart';
 class AuthController {
   static final AuthController _instance = AuthController._internal();
   factory AuthController() => _instance;
   AuthController._internal();
 
-  final String baseUrl = 'http://10.0.2.2:8000/api';
+  final String baseUrl = httpss;
   String? token;
 
   

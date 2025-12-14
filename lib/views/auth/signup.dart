@@ -23,113 +23,112 @@ class _SignUpViewState extends State<SignUpView> {
   Widget build(BuildContext context) {
     const Color darkGrey = Color(0xFF616161);
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Daftar Akun GoBox',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Buat akun baru untuk mulai menggunakan layanan GoBox.',
-              style: const TextStyle(
-                fontSize: 16,
-                color: darkGrey,
-              ),
-            ),
-            const SizedBox(height: 30),
 
-            GoBoxTextField(
-              controller: _usernameController,
-              labelText: 'Nama Lengkap',
-              hintText: 'Masukkan nama lengkap Anda',
-              prefixIcon: Icons.person_outline,
+      body: Stack(
+        children:[
+          Positioned.fill(
+            child: Image.asset(
+              'asset/background.png',
+              fit: BoxFit.cover,
             ),
-            const SizedBox(height: 16),
+          ),
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Daftar Akun GoBox',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Buat akun baru untuk mulai menggunakan layanan GoBox.',
+                  style: const TextStyle(fontSize: 16, color: darkGrey),
+                ),
+                const SizedBox(height: 30),
 
-            GoBoxTextField(
-              controller: _emailController,
-              labelText: 'Email',
-              hintText: 'contoh@email.com',
-              prefixIcon: Icons.email_outlined,
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16),
+                GoBoxTextField(
+                  controller: _usernameController,
+                  labelText: 'Nama Lengkap',
+                  hintText: 'Masukkan nama lengkap Anda',
+                  prefixIcon: Icons.person_outline,
+                ),
+                const SizedBox(height: 16),
 
-            GoBoxTextField(
-              controller: _passwordController,
-              labelText: 'Password',
-              hintText: 'Minimal 8 karakter',
-              prefixIcon: Icons.lock_outline,
-              isPassword: true,
-              obscureText: _obscureText,
-              onToggleVisibility: () {
-                setState(() {
-                  _obscureText = !_obscureText;
-                });
-              },
-            ),
-            const SizedBox(height: 30),
-             GoBoxTextField(
-              controller: _alamatUser,
-              labelText: 'Alamat',
-              hintText: 'Masukkan alamat anda',
-              prefixIcon: Icons.location_on_outlined,
-            ),
-            const SizedBox(height: 16),
+                GoBoxTextField(
+                  controller: _emailController,
+                  labelText: 'Email',
+                  hintText: 'contoh@email.com',
+                  prefixIcon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 16),
 
-            const SizedBox(height: 30),
+                GoBoxTextField(
+                  controller: _passwordController,
+                  labelText: 'Password',
+                  hintText: 'Minimal 8 karakter',
+                  prefixIcon: Icons.lock_outline,
+                  isPassword: true,
+                  obscureText: _obscureText,
+                  onToggleVisibility: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                ),
+                const SizedBox(height: 30),
+                GoBoxTextField(
+                  controller: _alamatUser,
+                  labelText: 'Alamat',
+                  hintText: 'Masukkan alamat anda',
+                  prefixIcon: Icons.location_on_outlined,
+                ),
+                const SizedBox(height: 16),
 
-            GoBoxElevatedButton(
-              text: 'Daftar',
-              onPressed: () async {
-                final result = await _authController.signUp(
-                    _usernameController.text,
-                    _emailController.text,
-                    _passwordController.text,
-                    _alamatUser.text,
-                    context);
-                setState(() => message = result);
+                const SizedBox(height: 30),
 
-                if (result.contains('berhasil')) {
-                  await Future.delayed(const Duration(seconds: 2));
-                   if (!context.mounted) return;
+                GoBoxElevatedButton(
+                  text: 'Daftar',
+                  onPressed: () async {
+                    final result = await _authController.signUp(
+                      _usernameController.text,
+                      _emailController.text,
+                      _passwordController.text,
+                      _alamatUser.text,
+                      context,
+                    );
+                    setState(() => message = result);
+
+                    if (result.contains('berhasil')) {
+                      await Future.delayed(const Duration(seconds: 2));
+                      if (!context.mounted) return;
                       Navigator.pop(context);
-                }
-              },
+                    }
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                // Link "Masuk di sini" (Reusable)
+                GoBoxTextLink(
+                  text: 'Sudah punya akun? Masuk di sini',
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                if (message.isNotEmpty && message != 'berhasil')
+                  AuthMessage(message: message),
+              ],
             ),
-            const SizedBox(height: 20),
-
-            // Link "Masuk di sini" (Reusable)
-            GoBoxTextLink(
-              text: 'Sudah punya akun? Masuk di sini',
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            const SizedBox(height: 20),
-
-
-            if (message.isNotEmpty && message != 'berhasil')
-              AuthMessage(message: message),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

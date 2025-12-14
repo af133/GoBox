@@ -5,6 +5,9 @@ import 'package:gobox/views/dashboard.dart';
 import 'package:gobox/views/splash_page.dart';
 import 'package:gobox/views/gudang/index.dart';
 import 'package:gobox/views/order/index.dart';
+import 'package:gobox/views/chat/index.dart';
+import 'package:gobox/views/profile/index.dart';
+import 'package:gobox/views/saldo/index.dart';
 
 class AppRoutes {
   static const splash = '/';
@@ -14,7 +17,8 @@ class AppRoutes {
   static const profil = '/profile';
   static const gudang = '/gudang';
   static const listOrder = '/order';
-  static const ordermitra = '/order_form';
+  static const chat= '/chat';
+  static const penarikan= '/penarikan';
 
   static Map<String, WidgetBuilder> routes = {
     splash: (_) => SplashPage(),
@@ -23,6 +27,9 @@ class AppRoutes {
     home:(_) => Dashboard(),
     gudang:(_) => ManajemenGudangPage(),
     listOrder:(_) => OrderListPage(),
+    chat:(_) => ChatListPage(),
+    penarikan:(_) => SaldoIndexPage(),
+    profil:(_) => ProfilePage(),
 
   };
 }

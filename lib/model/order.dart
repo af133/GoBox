@@ -32,7 +32,17 @@ class Lokasi {
     );
   }
 }
+class GroupedItem {
+  final String nama;
+  int jumlah;
+  final int harga;
 
+  GroupedItem({
+    required this.nama,
+    required this.jumlah,
+    required this.harga,
+  });
+}
 class ItemOrder {
   final int idItemOrder;
   final int idJenisBarang;

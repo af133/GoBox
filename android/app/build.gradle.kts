@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gobox.app"
+    namespace = "com.example.frontend_gobox"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

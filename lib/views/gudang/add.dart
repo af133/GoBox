@@ -1,6 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Untuk FilteringTextInputFormatter
 import 'package:image_picker/image_picker.dart';
+
+// Asumsi warna GoBox (Hijau Primer)
+const Color goBox = Color(0xFF4CAF50);
 
 class AddItemForm extends StatefulWidget {
   final String type;
@@ -19,35 +23,57 @@ class AddItemForm extends StatefulWidget {
 class _AddItemFormState extends State<AddItemForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController addressController = TextEditingController();
   final TextEditingController descController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
 
   File? pickedImage;
   String? imageError;
 
+  @override
+  void dispose() {
+    nameController.dispose();
+    descController.dispose();
+    priceController.dispose();
+    super.dispose();
+  }
+
+  // ===================================
+  // LOGIC PICK IMAGE
+  // ===================================
   Future<void> pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    
     if (image != null) {
       final file = File(image.path);
       final bytes = await file.length();
+      const int maxFileSizeMB = 2;
 
-      if (bytes > 2 * 1024 * 1024) {
-        setState(() {
-          pickedImage = null;
-          imageError = "Ukuran gambar maksimal 2 MB";
-        });
+      if (bytes > maxFileSizeMB * 1024 * 1024) {
+        if (mounted) {
+          setState(() {
+            pickedImage = null;
+            imageError = "Ukuran gambar maksimal $maxFileSizeMB MB";
+          });
+        }
         return;
       }
 
-      setState(() {
-        pickedImage = file;
-        imageError = null;
-      });
+      if (mounted) {
+        setState(() {
+          pickedImage = file;
+          imageError = null;
+        });
+      }
     }
   }
+
+  // ===================================
+  // LOGIC SUBMIT FORM
+  // ===================================
   void submit() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     if (widget.type == "gudang" && pickedImage == null) {
       setState(() {
@@ -55,104 +81,205 @@ class _AddItemFormState extends State<AddItemForm> {
       });
       return;
     }
+    
+    // Clear image error if an image exists
+    if (widget.type == "gudang" && pickedImage != null && imageError != null) {
+        setState(() {
+          imageError = null;
+        });
+    }
 
     Map<String, dynamic> data = {};
     if (widget.type == "gudang") {
       data = {
-        "nama_lokasi": nameController.text,
-        "deskripsi": descController.text,
+        "nama_lokasi": nameController.text.trim(),
+        "deskripsi": descController.text.trim(),
         "path_area": pickedImage,
       };
     } else if (widget.type == "harga") {
+      // Pastikan harga adalah integer yang valid
+      final int hargaSewa = int.tryParse(priceController.text.trim()) ?? 0;
       data = {
-        "jenis_barang": nameController.text,
-        "harga_sewa": int.tryParse(priceController.text) ?? 0,
+        "jenis_barang": nameController.text.trim(),
+        "harga_sewa": hargaSewa,
       };
     }
 
     widget.onSubmit(data);
   }
 
+  // ===================================
+  // WIDGET BUILDER
+  // ===================================
+
   @override
   Widget build(BuildContext context) {
+    final bool isGudang = widget.type == "gudang";
+    final String title = isGudang ? "Tambah Lokasi Gudang" : "Tambah Harga Barang";
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.type == "gudang" ? "Tambah Lokasi" : "Tambah Harga Barang"),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0.5,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Nama Lokasi / Jenis Barang
-              TextFormField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: widget.type == "gudang" ? "Nama Lokasi" : "Jenis Barang",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                validator: (v) => v == null || v.isEmpty ? "Tidak boleh kosong" : null,
-              ),
-              const SizedBox(height: 12),
+              // Judul Utama (Nama/Jenis Barang)
+              _buildNameInput(isGudang),
+              const SizedBox(height: 16),
 
-              if (widget.type == "gudang") const SizedBox(height: 12),
-              if (widget.type == "gudang")
-                TextFormField(
-                  controller: descController,
-                  decoration: InputDecoration(
-                    labelText: "Deskripsi",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-              if (widget.type == "gudang") const SizedBox(height: 12),
+              if (isGudang) 
+                _buildGudangFields()
+              else 
+                _buildHargaFields(),
 
-              if (widget.type == "gudang")
-                GestureDetector(
-                  onTap: pickImage,
-                  child: Container(
-                    width: double.infinity,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: pickedImage != null
-                        ? Image.file(pickedImage!, fit: BoxFit.cover)
-                        : const Center(child: Text("Pilih Gambar")),
-                  ),
-                ),
-              if (widget.type == "gudang" && imageError != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    imageError!,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                ),
-              if (widget.type == "gudang") const SizedBox(height: 12),
-
-              if (widget.type == "harga")
-                TextFormField(
-                  controller: priceController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: "Harga Sewa",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  validator: (v) => v == null || v.isEmpty ? "Tidak boleh kosong" : null,
-                ),
-              if (widget.type == "harga") const SizedBox(height: 20),
-
+              const SizedBox(height: 24),
+              
+              // Tombol Submit
               ElevatedButton(
                 onPressed: submit,
-                child: const Text("Simpan"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: goBox,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 5,
+                ),
+                child: const Text(
+                  "SIMPAN DATA",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  
+                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  // Widget Input Nama/Jenis Barang
+  Widget _buildNameInput(bool isGudang) {
+    return TextFormField(
+      controller: nameController,
+      decoration: InputDecoration(
+        labelText: isGudang ? "Nama Lokasi Gudang" : "Jenis Barang",
+        hintText: isGudang ? "Masukkan nama lokasi" : "Contoh: Pallet Kayu",
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        prefixIcon: Icon(isGudang ? Icons.warehouse_rounded : Icons.category_rounded, color: goBox),
+      ),
+      validator: (v) => v == null || v.trim().isEmpty ? "Input tidak boleh kosong" : null,
+    );
+  }
+
+  // Widget Fields Khusus Gudang
+  Widget _buildGudangFields() {
+    return Column(
+      children: [
+        // Deskripsi
+        TextFormField(
+          controller: descController,
+          maxLines: 3,
+          decoration: InputDecoration(
+            labelText: "Deskripsi Lokasi (Opsional)",
+            hintText: "Contoh: Gudang kering, berpendingin, area bongkar muat luas.",
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            alignLabelWithHint: true,
+            prefixIcon: const Padding(
+              padding: EdgeInsets.only(bottom: 40.0, left: 0),
+              child: Icon(Icons.description_rounded, color: goBox),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Picker Gambar
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Gambar Gudang (Maks 2 MB)", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: pickImage,
+              child: Container(
+                width: double.infinity,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  border: Border.all(
+                    color: imageError != null ? Colors.red : Colors.grey.shade400,
+                    width: imageError != null ? 2 : 1,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: pickedImage != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.file(pickedImage!, fit: BoxFit.cover),
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.add_a_photo_rounded, color: goBox, size: 40),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Ketuk untuk Pilih Gambar",
+                            style: TextStyle(color: goBox, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+            if (imageError != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8, left: 4),
+                child: Text(
+                  "⚠️ $imageError",
+                  style: const TextStyle(color: Colors.red, fontSize: 13),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Widget Fields Khusus Harga
+  Widget _buildHargaFields() {
+    return Column(
+      children: [
+        TextFormField(
+          controller: priceController,
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly, // Hanya izinkan angka
+          ],
+          decoration: InputDecoration(
+            labelText: "Harga Sewa per Satuan (Angka Saja)",
+            hintText: "Contoh: 50000",
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            prefixText: 'Rp ', // Prefix mata uang
+            prefixIcon: const Icon(Icons.payments_rounded, color: goBox),
+          ),
+          validator: (v) {
+            if (v == null || v.trim().isEmpty) {
+              return "Harga sewa tidak boleh kosong";
+            }
+            if (int.tryParse(v.trim()) == null || int.parse(v.trim()) <= 0) {
+              return "Harga harus berupa angka positif";
+            }
+            return null;
+          },
+        ),
+      ],
     );
   }
 }
