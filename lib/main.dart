@@ -1,13 +1,12 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'firebase_options.dart';
-import 'routes/routes.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:gobox/services/notification_api.dart';
+import 'routes/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('id_ID');
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await NotificationService.init();
 
   runApp(const BoxGoApp());
 }
@@ -20,6 +19,7 @@ class BoxGoApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: true,
       locale: const Locale('id', 'ID'),
+      navigatorKey: navigatorKey,
       initialRoute: AppRoutes.splash,
       routes: AppRoutes.routes,
     );
