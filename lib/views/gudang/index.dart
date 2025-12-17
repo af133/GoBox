@@ -131,17 +131,14 @@ class _ManajemenGudangPageState extends State<ManajemenGudangPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // SEARCH FIELD 
               _buildSearchField(),
 
               const SizedBox(height: 16),
 
-              // FILTER BUTTONS
               _buildFilterButtons(),
 
               const SizedBox(height: 16),
 
-              // LIST DATA
               Expanded(
                 child: isLoading 
                     ? const Center(child: CircularProgressIndicator(color: goBox))
@@ -155,8 +152,6 @@ class _ManajemenGudangPageState extends State<ManajemenGudangPage> {
     );
   }
   
-  // --- WIDGET BUILDER ---
-
   Widget _buildSearchField() {
     return TextField(
       controller: searchController,
@@ -273,7 +268,6 @@ class _ManajemenGudangPageState extends State<ManajemenGudangPage> {
     );
   }
 
-  // Card Gudang - Stylish
   Widget _gudangCard(dynamic item) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -304,7 +298,6 @@ class _ManajemenGudangPageState extends State<ManajemenGudangPage> {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              // Gambar/Icon
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.network(
@@ -423,7 +416,6 @@ class _ManajemenGudangPageState extends State<ManajemenGudangPage> {
     );
   }
 
-  // Logic Navigasi ke Form Tambah Item
   void _navigateToAddItem() {
     Navigator.push(
       context,

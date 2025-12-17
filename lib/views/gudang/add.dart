@@ -1,9 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Untuk FilteringTextInputFormatter
+import 'package:flutter/services.dart'; 
 import 'package:image_picker/image_picker.dart';
 
-// Asumsi warna GoBox (Hijau Primer)
 const Color goBox = Color(0xFF4CAF50);
 
 class AddItemForm extends StatefulWidget {
@@ -37,9 +36,6 @@ class _AddItemFormState extends State<AddItemForm> {
     super.dispose();
   }
 
-  // ===================================
-  // LOGIC PICK IMAGE
-  // ===================================
   Future<void> pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     
@@ -67,9 +63,6 @@ class _AddItemFormState extends State<AddItemForm> {
     }
   }
 
-  // ===================================
-  // LOGIC SUBMIT FORM
-  // ===================================
   void submit() {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -82,7 +75,6 @@ class _AddItemFormState extends State<AddItemForm> {
       return;
     }
     
-    // Clear image error if an image exists
     if (widget.type == "gudang" && pickedImage != null && imageError != null) {
         setState(() {
           imageError = null;
@@ -97,7 +89,6 @@ class _AddItemFormState extends State<AddItemForm> {
         "path_area": pickedImage,
       };
     } else if (widget.type == "harga") {
-      // Pastikan harga adalah integer yang valid
       final int hargaSewa = int.tryParse(priceController.text.trim()) ?? 0;
       data = {
         "jenis_barang": nameController.text.trim(),
@@ -107,10 +98,6 @@ class _AddItemFormState extends State<AddItemForm> {
 
     widget.onSubmit(data);
   }
-
-  // ===================================
-  // WIDGET BUILDER
-  // ===================================
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +117,6 @@ class _AddItemFormState extends State<AddItemForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Judul Utama (Nama/Jenis Barang)
               _buildNameInput(isGudang),
               const SizedBox(height: 16),
 
@@ -141,7 +127,6 @@ class _AddItemFormState extends State<AddItemForm> {
 
               const SizedBox(height: 24),
               
-              // Tombol Submit
               ElevatedButton(
                 onPressed: submit,
                 style: ElevatedButton.styleFrom(
@@ -166,7 +151,6 @@ class _AddItemFormState extends State<AddItemForm> {
     );
   }
 
-  // Widget Input Nama/Jenis Barang
   Widget _buildNameInput(bool isGudang) {
     return TextFormField(
       controller: nameController,
@@ -180,7 +164,6 @@ class _AddItemFormState extends State<AddItemForm> {
     );
   }
 
-  // Widget Fields Khusus Gudang
   Widget _buildGudangFields() {
     return Column(
       children: [
@@ -201,7 +184,6 @@ class _AddItemFormState extends State<AddItemForm> {
         ),
         const SizedBox(height: 16),
 
-        // Picker Gambar
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -252,7 +234,6 @@ class _AddItemFormState extends State<AddItemForm> {
     );
   }
 
-  // Widget Fields Khusus Harga
   Widget _buildHargaFields() {
     return Column(
       children: [
@@ -260,13 +241,13 @@ class _AddItemFormState extends State<AddItemForm> {
           controller: priceController,
           keyboardType: TextInputType.number,
           inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly, // Hanya izinkan angka
+            FilteringTextInputFormatter.digitsOnly,
           ],
           decoration: InputDecoration(
             labelText: "Harga Sewa per Satuan (Angka Saja)",
             hintText: "Contoh: 50000",
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixText: 'Rp ', // Prefix mata uang
+            prefixText: 'Rp ', 
             prefixIcon: const Icon(Icons.payments_rounded, color: goBox),
           ),
           validator: (v) {

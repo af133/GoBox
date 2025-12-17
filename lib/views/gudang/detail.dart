@@ -5,11 +5,10 @@ import 'package:latlong2/latlong.dart';
 import 'package:gobox/controllers/gudang.dart';
 import 'package:gobox/controllers/auth.dart';
 import 'package:http/http.dart' as http;
-// Import yang diperlukan
+
 import 'maps.dart'; 
 import 'update.dart';
 
-// Asumsi warna GoBox (Hijau Primer)
 const Color goBox = Color(0xFF4CAF50); 
 
 class DetailGudangPage extends StatefulWidget {
@@ -29,7 +28,6 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
   List<Marker> markers = [];
   List<Polygon> polygons = [];
 
-  // Map Controller untuk mengontrol tampilan Map
   final MapController mapController = MapController();
 
   @override
@@ -39,10 +37,6 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
     fetchDetail();
   }
 
-  // =================================================
-  // LOGIC DATA FETCHING & PARSING
-  // =================================================
-
   Future<void> fetchUser() async {
     final user = await AuthController().getUser();
     if (user == null) return;
@@ -50,7 +44,6 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
   }
 
   Future<void> _getAddress(double lat, double lng) async {
-    // Reverse Geocoding menggunakan Nominatim (OpenStreetMap)
     try {
       final url = Uri.parse(
         "https://nominatim.openstreetmap.org/reverse?"
@@ -58,7 +51,7 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
       );
 
       final res = await http.get(url, headers: {
-        "User-Agent": "com.gobox.app" // Wajib
+        "User-Agent": "com.gobox.app"
       });
 
       if (res.statusCode == 200) {
@@ -96,7 +89,6 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
     final double lat = double.tryParse(data['latitude']?.toString() ?? '') ?? 0.0;
     final double lng = double.tryParse(data['longitude']?.toString() ?? '') ?? 0.0;
 
-    // Inisialisasi Marker (Titik Tengah Gudang)
     List<Marker> tmpMarkers = [];
     if (lat != 0.0 && lng != 0.0) {
       tmpMarkers.add(
@@ -109,7 +101,6 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
       );
     }
 
-    // Inisialisasi Polygon (Area Gudang)
     List<Polygon> tmpPolygons = [];
     if (data['area'] != null && (data['area'] as List).isNotEmpty) {
       for (var a in data['area']) {
@@ -117,21 +108,20 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
         if (polygonStr != null && polygonStr.isNotEmpty) {
           try {
             final geoJson = jsonDecode(polygonStr);
-            // GeoJson Polygon coordinates: [[[lng, lat], [lng, lat], ...]]
             final List rings = geoJson['coordinates']; 
 
             for (var ring in rings) {
               final points = (ring as List)
                   .map((c) => LatLng(
-                      double.parse(c[1].toString()), // Latitude
-                      double.parse(c[0].toString()), // Longitude
+                      double.parse(c[1].toString()), 
+                      double.parse(c[0].toString()), 
                     ))
                   .toList();
 
               tmpPolygons.add(
                 Polygon(
                   points: points,
-                  color: goBox.withOpacity(0.2), // Warna GoBox transparan
+                  color: goBox.withOpacity(0.2),
                   borderColor: goBox,
                   borderStrokeWidth: 3,
                 ),
@@ -143,8 +133,6 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
         }
       }
     }
-
-    // SET STATE
     if (mounted) {
       setState(() {
         lokasi = data;
@@ -154,17 +142,12 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
       });
     }
 
-    // Ambil alamat otomatis
     if (lat != 0 && lng != 0) {
       _getAddress(lat, lng);
     } else {
       if (mounted) setState(() => alamat = "Alamat tidak tersedia (koordinat kosong)");
     }
   }
-
-  // =================================================
-  // WIDGET BUILDER
-  // =================================================
 
   @override
   Widget build(BuildContext context) {
@@ -191,26 +174,22 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
         title: Text(lokasi!['nama_lokasi'] ?? 'Detail Gudang', style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 0.5,
-        actions: [_buildEditMenuButton(context)], // Tombol Edit Menu
+        actions: [_buildEditMenuButton(context)],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Gambar Area
             _buildImageArea(),
             const SizedBox(height: 16),
 
-            // Detail Utama (Nama & Deskripsi)
             _buildDetailCard(lokasi!),
             const SizedBox(height: 16),
             
-            // Detail Alamat & Koordinat
             _buildLocationInfo(initialLatLng),
             const SizedBox(height: 16),
 
-            // MAP
             if (markers.isNotEmpty || polygons.isNotEmpty)
               _buildMapWidget(initialLatLng),
 
@@ -228,7 +207,6 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
       onSelected: (value) async {
         bool? result = false;
         if (value == 'edit_lokasi') {
-          // Navigasi ke Edit Lokasi (Nama/Deskripsi)
           result = await Navigator.push(
             context,
             MaterialPageRoute(
@@ -240,7 +218,6 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
             ),
           );
         } else if (value == 'edit_map') {
-          // Navigasi ke Edit Map (Titik/Area)
           result = await Navigator.push(
             context,
             MaterialPageRoute(
@@ -369,14 +346,12 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
             ],
           ),
           const Divider(height: 20),
-          // Nama Lokasi
           _buildInfoRow(
             title: "Nama Gudang",
             value: data['nama_lokasi'] ?? '-',
             icon: Icons.title_rounded,
           ),
           const SizedBox(height: 12),
-          // Deskripsi
           _buildInfoRow(
             title: "Deskripsi",
             value: data['deskripsi'] ?? 'Tidak ada deskripsi',
@@ -419,7 +394,6 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
             ],
           ),
           const Divider(height: 20),
-          // Alamat
           _buildInfoRow(
             title: "Alamat Lengkap (Otomatis)",
             value: alamat,
@@ -427,10 +401,9 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
             maxLines: 5,
           ),
           const SizedBox(height: 12),
-          // Koordinat
           _buildInfoRow(
             title: "Koordinat (Lat, Lng)",
-            value: "${initialLatLng.latitude.toStringAsFixed(6)}, ${initialLatLng.longitude.toStringAsFixed(6)}", // Format 6 angka di belakang koma
+            value: "${initialLatLng.latitude.toStringAsFixed(6)}, ${initialLatLng.longitude.toStringAsFixed(6)}",
             icon: Icons.gps_fixed_rounded,
             isMonospace: true,
           ),
@@ -483,7 +456,7 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
 
   Widget _buildMapWidget(LatLng initialLatLng) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16), // Radius Map konsisten
+      borderRadius: BorderRadius.circular(16), 
       child: Container(
         height: 300,
         decoration: BoxDecoration(
@@ -496,12 +469,11 @@ class _DetailGudangPageState extends State<DetailGudangPage> {
             initialCenter: initialLatLng,
             initialZoom: 16,
             interactionOptions: const InteractionOptions(
-              flags: InteractiveFlag.all & ~InteractiveFlag.rotate, // Nonaktifkan rotasi
+              flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
             ),
           ),
           children: [
             TileLayer(
-              // Menggunakan TileLayer OSM standar untuk kecepatan
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.gobox.app',
             ),

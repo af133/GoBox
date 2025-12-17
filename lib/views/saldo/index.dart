@@ -6,11 +6,10 @@ import 'package:gobox/controllers/auth.dart';
 import 'package:gobox/views/widgets/bnavbar.dart';
 import 'penarikan.dart';
 
-// --- DEFINISI WARNA KHUSUS ---
-const Color primaryColor = Colors.green; // Warna utama aplikasi
+const Color primaryColor = Colors.green; 
 const Color pemasukanColor = Colors.green;
 const Color pengeluaranColor = Colors.red;
-const Color backgroundLight = Color(0xFFF7F7F7); // Latar belakang abu-abu muda
+const Color backgroundLight = Color(0xFFF7F7F7); 
 
 class SaldoIndexPage extends StatefulWidget {
   const SaldoIndexPage({super.key});
@@ -48,7 +47,7 @@ class _SaldoIndexPageState extends State<SaldoIndexPage> {
     final user = await AuthController().getUser();
     if (user == null) return;
 
-    idMitra = user.idUser!; // pastikan idUser = idMitra
+    idMitra = user.idUser!; 
     saldoFuture = service.getSaldo(idMitra);
 
     setState(() {
@@ -67,7 +66,6 @@ class _SaldoIndexPageState extends State<SaldoIndexPage> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      // 1. Loading Indicator dengan warna primer
       return Scaffold(
         backgroundColor: backgroundLight,
         body: Center(child: CircularProgressIndicator(color: primaryColor)),
@@ -78,6 +76,8 @@ class _SaldoIndexPageState extends State<SaldoIndexPage> {
       backgroundColor: backgroundLight,
       body: Column(
         children: [
+          const SizedBox(width: 8),
+          
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Text(
@@ -91,7 +91,6 @@ class _SaldoIndexPageState extends State<SaldoIndexPage> {
           ),
 
           Expanded(
-            // 3. DAFTAR RIWAYAT SALDO
             child: FutureBuilder<List<Saldo>>(
               future: saldoFuture,
               builder: (context, snapshot) {
@@ -137,27 +136,22 @@ class _SaldoIndexPageState extends State<SaldoIndexPage> {
               builder: (context) => SaldoAddPage(idMitra: idMitra),
             ),
           ).then((_) {
-            // refresh saldo setelah kembali dari halaman tambah
             setState(() {
               saldoFuture = service.getSaldo(idMitra);
             });
           });
         },
-        backgroundColor: primaryColor, // FAB berwarna hijau
+        backgroundColor: primaryColor,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
-  // --- WIDGET UNTUK TAMPILAN RIWAYAT TRANSAKSI (ITEM LIST) ---
   Widget _buildTransactionItem(Saldo s) {
     final bool isPemasukan = s.type == 'pemasukan';
     final Color itemColor = isPemasukan ? pemasukanColor : pengeluaranColor;
 
-    // Format jumlah Rp
     final formattedJumlah = formatCurrency(s.jumlah.toDouble());
-
-    // Format tanggal
     final formattedTanggal = DateFormat(
       'dd MMM yyyy',
     ).format(DateTime.parse(s.tanggal));
@@ -170,7 +164,7 @@ class _SaldoIndexPageState extends State<SaldoIndexPage> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -178,11 +172,10 @@ class _SaldoIndexPageState extends State<SaldoIndexPage> {
       ),
       child: Row(
         children: [
-          // Ikon Pemasukan/Pengeluaran
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: itemColor.withOpacity(0.1),
+              color: itemColor.withValues(alpha:0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -194,8 +187,6 @@ class _SaldoIndexPageState extends State<SaldoIndexPage> {
             ),
           ),
           const SizedBox(width: 15),
-
-          // Detail Transaksi
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,8 +216,6 @@ class _SaldoIndexPageState extends State<SaldoIndexPage> {
               ],
             ),
           ),
-
-          // Jumlah Saldo
           Text(
             formattedJumlah,
             style: TextStyle(

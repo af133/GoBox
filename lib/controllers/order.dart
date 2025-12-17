@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:gobox/model/order.dart';
 import 'http.dart';
+
 class OrderController {
   static final OrderController _instance = OrderController._internal();
   factory OrderController() => _instance;
@@ -12,7 +13,7 @@ class OrderController {
   final String baseUrl = httpss;
   String? token;
 
-  Future<Map<String, dynamic>> showDashboard({required String idUser}) async {
+  Future<Map<String, dynamic>> showDashboard({required int idUser}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       token = prefs.getString('token');
@@ -58,41 +59,42 @@ class OrderController {
       };
     }
   }
-  
+
   Future<List<OrderModel>> getOrdersMitra(String idMitra) async {
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    token = prefs.getString('token');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      token = prefs.getString('token');
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/dashboard/mitra'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: jsonEncode({'id_mitra': idMitra}),
-    );
+      final response = await http.post(
+        Uri.parse('$baseUrl/dashboard/mitra'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'id_mitra': idMitra}),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
 
-      List<OrderModel> orders = [];
+        List<OrderModel> orders = [];
 
-      for (var o in data['orderAll']) {
-        orders.add(OrderModel.fromJson(o));
+        for (var o in data['orderAll']) {
+          orders.add(OrderModel.fromJson(o));
+        }
+
+        return orders;
+      } else {
+        return [];
       }
-
-      return orders;
-    } else {
+    } catch (e) {
+      debugPrint("Error: $e");
       return [];
     }
-  } catch (e) {
-    debugPrint("Error: $e");
-    return [];
   }
-}
-Future<OrderModel?> getOrderDetail(String idOrder) async {
+
+  Future<OrderModel?> getOrderDetail(String idOrder) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       token = prefs.getString('token');
@@ -116,6 +118,4 @@ Future<OrderModel?> getOrderDetail(String idOrder) async {
     }
     return null;
   }
-
-  
 }

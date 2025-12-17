@@ -5,6 +5,8 @@ import 'package:gobox/controllers/auth.dart';
 // Pastikan import ini menunjuk ke AppbarHome yang baru Anda modifikasi
 import "package:gobox/views/widgets/app_bar.dart";
 import 'package:gobox/views/widgets/bnavbar.dart';
+import 'package:gobox/controllers/notifikasi.dart';
+import 'package:gobox/model/notifikasi.dart';
 
 // Asumsi warna goBox (Hijau Primer GoBox)
 const Color goBox = Color(0xFF4CAF50);
@@ -17,11 +19,15 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  String idUser = '';
+  int? idUser;
   String? nama;
   String? pathProfil;
+
   Map<String, dynamic>? dashboardData;
   bool loading = true;
+
+  List<AppNotification> notif = [];
+  int countUnRead = 0;
 
   @override
   void initState() {
@@ -31,8 +37,9 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> init() async {
     await getUser();
-    if (idUser.isNotEmpty) {
+    if (idUser != null) {
       await fetchData();
+      await getNotifikasi();
     }
     setState(() {
       loading = false;
@@ -44,14 +51,29 @@ class _DashboardState extends State<Dashboard> {
     if (user == null) return;
 
     setState(() {
-      idUser = user.idUser.toString();
+      idUser = user.idUser;
       nama = user.nama;
       pathProfil = user.pathProfil;
     });
   }
 
+  Future<void> getNotifikasi() async {
+    if (idUser == null) return ;
+    final service = NotificationService();
+
+    final List<AppNotification> data = await service.fetchNotifications(
+      idUser: idUser!,
+      autoRead: false,
+    );
+
+    setState(() {
+      notif = data;
+      countUnRead = data.where((n) => !n.isRead).length;
+    });
+  }
+
   Future<void> fetchData() async {
-    final data = await OrderController().showDashboard(idUser: idUser);
+    final data = await OrderController().showDashboard(idUser: idUser!);
 
     setState(() {
       dashboardData = data;
@@ -63,7 +85,12 @@ class _DashboardState extends State<Dashboard> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       // Panggil AppbarHome yang sudah dimodifikasi
-      appBar: AppbarHome(name: nama ?? 'Mitra', pathProfil: pathProfil),
+      appBar: AppbarHome(
+        name: nama ?? 'Mitra',
+        pathProfil: pathProfil,
+        idUser: idUser!,
+        countUnRead: countUnRead,
+      ),
       body: loading
           ? const Center(child: CircularProgressIndicator(color: goBox))
           : RefreshIndicator(
@@ -102,7 +129,8 @@ class _DashboardState extends State<Dashboard> {
 
   Widget _buildSummaryCard(BuildContext context) {
     final totalOrders = dashboardData?['total_orders'].toString() ?? "0";
-    final totalPenghasilan = dashboardData?['total_penghasilan'].toString() ?? "0";
+    final totalPenghasilan =
+        dashboardData?['total_penghasilan'].toString() ?? "0";
     final saldoTersedia = dashboardData?['saldo_tersedia'] ?? 0;
 
     return Column(

@@ -45,7 +45,7 @@ class _LoginViewState extends State<LoginView> {
             SingleChildScrollView(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: size.height, // 🔥 KUNCI TINGGI
+                  minHeight: size.height, 
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -57,7 +57,7 @@ class _LoginViewState extends State<LoginView> {
 
                       Center(
                         child: SizedBox(
-                          height: size.height * 0.25, // RESPONSIVE
+                          height: size.height * 0.25, 
                           child: Image.asset('asset/logo.png'),
                         ),
                       ),

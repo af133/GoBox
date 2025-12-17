@@ -114,7 +114,6 @@ class _SignUpViewState extends State<SignUpView> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Link "Masuk di sini" (Reusable)
                   GoBoxTextLink(
                     text: 'Sudah punya akun? Masuk di sini',
                     onPressed: () {

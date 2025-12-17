@@ -10,7 +10,7 @@
     <application
         android:label="frontend_gobox"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/icon_gobox">
 
         <activity
             android:name=".MainActivity"

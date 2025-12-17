@@ -5,9 +5,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gobox/controllers/gudang.dart';
 
-// Asumsi warna GoBox (Hijau Primer)
 const Color goBox = Color(0xFF4CAF50);
-const Color editingColor = Color(0xFFFF9800); // Orange untuk Polygon yang sedang diedit
+const Color editingColor = Color(0xFFFF9800); 
 
 class EditLokasiPage extends StatefulWidget {
   final String idLokasi;
@@ -21,7 +20,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
   Map<String, dynamic>? lokasi;
   bool loading = true;
   
-  // Map Controller untuk mengontrol Map
   final MapController mapController = MapController(); 
 
   LatLng? marker;
@@ -30,11 +28,9 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
   int? editingPolygonIndex;
   List<LatLng> currentEditingPolygon = [];
 
-  // Getters untuk Polygon yang ditampilkan di Map
   List<Polygon> get displayedPolygons {
     final List<Polygon> polys = [];
     
-    // 1. Polygon yang sudah disimpan
     polys.addAll(polygonsCoords
       .asMap()
       .entries
@@ -47,7 +43,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
           ))
       .toList());
 
-    // 2. Polygon yang sedang diedit (override warna menjadi Orange)
     if (editingPolygonIndex != null && currentEditingPolygon.isNotEmpty) {
       polys.add(
         Polygon(
@@ -62,7 +57,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
     return polys;
   }
   
-  // Getters untuk Marker Polygon yang sedang diedit (titik-titik)
   List<Marker> get polygonEditingMarkers {
     if (editingPolygonIndex == null) return [];
     
@@ -82,7 +76,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
     }).toList();
   }
   
-  // Getters untuk Marker Titik Utama Gudang
   List<Marker> get mainMarker {
     if (marker == null) return [];
     return [
@@ -98,10 +91,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
       ),
     ];
   }
-
-  // ===================================
-  // INIT & DATA FETCHING
-  // ===================================
 
   @override
   void initState() {
@@ -129,7 +118,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
     final double lng = double.tryParse(data['longitude']?.toString() ?? '') ?? 0.0;
     LatLng? initialMarker = (lat != 0.0 && lng != 0.0) ? LatLng(lat, lng) : null;
 
-    // Jika marker kosong, coba ambil lokasi saat ini
     if (initialMarker == null) {
       bool permissionGranted = await _requestLocationPermission();
       if (permissionGranted) {
@@ -144,7 +132,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
       }
     }
 
-    // Parsing Polygons
     List<List<LatLng>> tmpPolygons = [];
     if (data['area'] != null && (data['area'] as List).isNotEmpty) {
       for (var a in data['area']) {
@@ -152,13 +139,12 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
         if (polygonStr != null && polygonStr.isNotEmpty) {
           try {
             final geoJson = jsonDecode(polygonStr);
-            // GeoJson Polygon coordinates: [[[lng, lat], [lng, lat], ...]]
             if (geoJson['type'] == 'Polygon' && geoJson['coordinates'] is List && geoJson['coordinates'].isNotEmpty) {
               final List<dynamic> outerRing = geoJson['coordinates'][0];
               tmpPolygons.add(outerRing
                   .map((c) => LatLng(
-                        double.parse(c[1].toString()), // Latitude
-                        double.parse(c[0].toString()))) // Longitude
+                        double.parse(c[1].toString()), 
+                        double.parse(c[0].toString())))
                   .toList());
             }
           } catch (e) {
@@ -175,7 +161,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
         polygonsCoords = tmpPolygons;
         loading = false;
       });
-      // Pindahkan fokus map ke posisi marker/polygon
       if (marker != null) {
         mapController.move(marker!, 16);
       } else if (polygonsCoords.isNotEmpty && polygonsCoords.first.isNotEmpty) {
@@ -185,7 +170,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
   }
 
   Future<bool> _requestLocationPermission() async {
-    // Logic Request Permission tetap sama, tapi menggunakan context/snackbar yang lebih modern
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
@@ -214,16 +198,10 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
     return true;
   }
 
-  // ===================================
-  // LOGIC MAP INTERACTION
-  // ===================================
-
   void updateMarker(LatLng newMarker) {
     if (editingPolygonIndex != null) {
-      // Jika sedang edit polygon, klik harus menambah titik
       addPointToPolygon(newMarker);
     } else {
-      // Jika tidak sedang edit polygon, klik menggeser marker utama
       setState(() => marker = newMarker);
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -315,7 +293,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
       return;
     }
     
-    // Konfirmasi sebelum menghapus
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -355,10 +332,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
     }
   }
 
-  // ===================================
-  // SAVE DATA
-  // ===================================
-
   Future<void> saveData() async {
     if (editingPolygonIndex != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -376,20 +349,17 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
 
     final controller = ManagemenGudang();
 
-    // 1. Prepare Polygon JSONs
     List<Map<String, dynamic>> polygonsJson = polygonsCoords
-        .where((poly) => poly.length >= 3) // Hanya simpan polygon dengan min 3 titik
+        .where((poly) => poly.length >= 3)
         .map((poly) {
-          // GeoJson format: [longitude, latitude]
           final coordinatesList = poly.map((p) => [p.longitude, p.latitude]).toList();
           
-          // Polygon GeoJson harus ditutup (titik pertama = titik terakhir)
           if (coordinatesList.isNotEmpty && coordinatesList.first != coordinatesList.last) {
             coordinatesList.add(coordinatesList.first);
           }
           
           return {
-            "id_polygon": null, // Jika backend support ID, ini bisa diisi
+            "id_polygon": null, 
             "polygon": jsonEncode({
               "type": "Polygon",
               "coordinates": [coordinatesList]
@@ -397,7 +367,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
           };
         }).toList();
 
-    // 2. Kirim data ke Controller
     final success = await controller.updateLokasiAndPolygon(
       idLokasi: widget.idLokasi,
       latitude: marker?.latitude.toString() ?? '0',
@@ -410,7 +379,7 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Data berhasil disimpan'), backgroundColor: goBox),
         );
-        Navigator.pop(context, true); // Pop dan kirim sinyal 'true' (data diubah)
+        Navigator.pop(context, true); 
       }
     } else {
       if (mounted) {
@@ -420,10 +389,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
       }
     }
   }
-
-  // ===================================
-  // WIDGET BUILDER
-  // ===================================
 
   @override
   Widget build(BuildContext context) {
@@ -439,7 +404,7 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
     
     LatLng initialPos = marker ?? (polygonsCoords.isNotEmpty && polygonsCoords.first.isNotEmpty
                 ? polygonsCoords.first.first
-                : LatLng(-6.2088, 106.8456)); // Default ke Jakarta jika kosong
+                : LatLng(-6.2088, 106.8456)); 
 
     return Scaffold(
       appBar: AppBar(
@@ -449,7 +414,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
       ),
       body: Stack(
         children: [
-          // Flutter Map Layer
           FlutterMap(
             mapController: mapController,
             options: MapOptions(
@@ -461,36 +425,20 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
               ),
             ),
             children: [
-              // Tile Layer (Map Style)
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // Ganti ke OSM standar
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', 
                 userAgentPackageName: 'com.gobox.app',
               ),
-              
-              // Polygon Layer (Polygon yang sudah disimpan & yang sedang diedit)
               PolygonLayer(polygons: displayedPolygons),
               
-              // Marker Layer (Titik Tengah Gudang)
               MarkerLayer(markers: mainMarker),
 
-              // Marker Layer (Titik-titik polygon yang sedang diedit)
               MarkerLayer(markers: polygonEditingMarkers),
             ],
           ),
-
-          // ==============================
-          // 1. Polygon Controls (BOTTOM-CENTER)
-          // ==============================
           _buildPolygonControlPanel(),
-
-          // ==============================
-          // 2. Action Buttons (TOP-RIGHT)
-          // ==============================
           _buildActionButtons(),
           
-          // ==============================
-          // 3. Attribution (BOTTOM-LEFT)
-          // ==============================
           Positioned(
             bottom: 4,
             left: 4,
@@ -511,7 +459,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
     );
   }
   
-  // Widget Builder untuk Tombol Aksi (Save, Hapus Titik)
   Widget _buildActionButtons() {
     return SafeArea(
       child: Padding(
@@ -519,7 +466,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // Tombol Simpan Semua Data
             ElevatedButton.icon(
               onPressed: saveData,
               icon: const Icon(Icons.save_rounded, color: Colors.white),
@@ -532,7 +478,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
             ),
             const SizedBox(height: 12),
             
-            // Tombol Hapus Titik Terakhir (Hanya tampil saat Edit Polygon Aktif)
             if (editingPolygonIndex != null && currentEditingPolygon.isNotEmpty)
               ElevatedButton.icon(
                 onPressed: removeLastPoint,
@@ -550,7 +495,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
     );
   }
   
-  // Widget Builder untuk Panel Kontrol Polygon
   Widget _buildPolygonControlPanel() {
     return Positioned(
       bottom: 8,
@@ -558,7 +502,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
       right: 0,
       child: Column(
         children: [
-          // Baris Kontrol Polygon Aktif (Save/Cancel)
           if (editingPolygonIndex != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -588,7 +531,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
           
           const SizedBox(height: 12),
           
-          // List Polygon & Tombol Tambah
           SizedBox(
             height: 50,
             child: ListView.builder(
@@ -596,7 +538,6 @@ class _EditLokasiPageState extends State<EditLokasiPage> {
               itemCount: polygonsCoords.length + 1,
               itemBuilder: (context, i) {
                 if (i == 0) {
-                  // Tombol Tambah Polygon
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: ElevatedButton.icon(

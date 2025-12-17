@@ -4,13 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:gobox/controllers/gudang.dart';
 
-// Asumsi warna GoBox (Hijau Primer)
 const Color goBox = Color(0xFF4CAF50);
 
 class EditItemForm extends StatefulWidget {
   final String type; 
   final Map<String, dynamic> initialData;
-  final String idUser; // idUser tidak digunakan di sini, tapi dipertahankan
+  final String idUser; 
   final VoidCallback? onUpdate;
 
   const EditItemForm({

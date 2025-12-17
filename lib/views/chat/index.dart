@@ -22,7 +22,7 @@ class _ChatListPageState extends State<ChatListPage> {
   bool isLoading = true;
 
   Timer? _timer;
-  bool _isActivePage = true; // ⬅ kontrol aktif halaman
+  bool _isActivePage = true; 
 
   String formatTime(DateTime time) {
     return DateFormat('HH:mm', 'id_ID').format(time);
@@ -46,11 +46,8 @@ class _ChatListPageState extends State<ChatListPage> {
     }
   }
 
-  // =======================
-  // LOAD CHAT
-  // =======================
   Future<void> _loadChats() async {
-    if (!_isActivePage) return; // ⛔ jangan reload kalau tidak aktif
+    if (!_isActivePage) return; 
 
     try {
       final data = await service.getChats(userType: userType);
@@ -64,12 +61,8 @@ class _ChatListPageState extends State<ChatListPage> {
       debugPrint("❌ Load chat error: $e");
     }
   }
-
-  // =======================
-  // POLLING CONTROL
-  // =======================
   void _startPolling() {
-    _timer?.cancel(); // cegah double timer
+    _timer?.cancel(); 
     _timer = Timer.periodic(const Duration(seconds: 3), (_) => _loadChats());
   }
 
@@ -84,9 +77,6 @@ class _ChatListPageState extends State<ChatListPage> {
     super.dispose();
   }
 
-  // =======================
-  // UI
-  // =======================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,7 +115,6 @@ class _ChatListPageState extends State<ChatListPage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(14),
                       onTap: () {
-                        // ⛔ STOP polling saat masuk chat
                         _isActivePage = false;
                         _stopPolling();
 
@@ -139,7 +128,6 @@ class _ChatListPageState extends State<ChatListPage> {
                             ),
                           ),
                         ).then((_) {
-                          // ▶️ LANJUT polling saat balik
                           _isActivePage = true;
                           _startPolling();
                         });

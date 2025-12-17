@@ -7,7 +7,7 @@ import 'http.dart';
 
 class ProfilController {
   final String baseUrl = httpss;
-
+  
   Future<String> updateProfile({
     required String nama,
     String? alamat,
@@ -20,22 +20,6 @@ class ProfilController {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
-
-      /// ================= DEBUG REQUEST =================
-      if (kDebugMode) {
-        debugPrint('🟡 UPDATE PROFILE REQUEST');
-        debugPrint('URL      : $baseUrl/profile/update');
-        debugPrint('Token    : $token');
-        debugPrint('Nama     : $nama');
-        debugPrint('Role     : $role');
-        debugPrint('ID User  : $idUser');
-        debugPrint('Alamat   : $alamat');
-        debugPrint('No HP    : $nomorHp');
-        debugPrint('Password : ${password != null ? "ADA" : "TIDAK"}');
-        debugPrint('Image    : ${imageFile?.path}');
-      }
-
-      /// ================================================
 
       var request = http.MultipartRequest(
         'POST',
@@ -62,15 +46,6 @@ class ProfilController {
       final response = await request.send();
       final body = await response.stream.bytesToString();
       final data = jsonDecode(body);
-
-      /// ================= DEBUG RESPONSE =================
-      if (kDebugMode) {
-        debugPrint('🔵 UPDATE PROFILE RESPONSE');
-        debugPrint('Status : ${response.statusCode}');
-        debugPrint('Body   : $body');
-      }
-
-      /// ================================================
 
       if (response.statusCode == 200) {
         await prefs.setString("user", jsonEncode(data['user']));
