@@ -3,10 +3,10 @@ name: Build Mitra GoBox
 on:
   push:
     branches:
-      - mitra
+      - main
   pull_request:
     branches:
-      - mitra
+      - main
 
 jobs:
   build:
