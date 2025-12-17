@@ -3,7 +3,6 @@ import 'package:gobox/controllers/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gobox/model/notifikasi.dart';
-import 'http.dart'
 
 class NotificationService {
   final String baseUrl = httpss;
