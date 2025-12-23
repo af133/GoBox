@@ -3,6 +3,7 @@ import 'package:gobox/views/splashScreen/screen/screen1.dart';
 import 'package:gobox/views/splashScreen/screen/screen2.dart';
 import 'package:gobox/views/splashScreen/screen/screen3.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:gobox/routes/routes.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -40,7 +41,9 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushReplacementNamed(context, AppRoute.login);
+                  },
                   child: Text(
                     buttonText,
                     style: TextStyle(fontWeight: FontWeight.bold),

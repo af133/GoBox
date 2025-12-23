@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gobox/views/splashScreen/onboarding_screen.dart';
 import 'package:gobox/views/splashScreen/splash_screen_logic.dart';
-
+import 'package:gobox/views/auth/login.dart';
 class AppRoute {
   static const splash = '/';
   static const login = '/login';
@@ -10,5 +10,6 @@ class AppRoute {
   static Map<String, WidgetBuilder> routes = {
     splash: (_) => SplashScreenLogic(),
     onboarding: (_) => OnboardingScreen(),
+    login: (_) => LoginView()
   };
 }

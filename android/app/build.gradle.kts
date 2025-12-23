@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services")
+    id("com.google.gms.google-services") 
 }
 
 android {
@@ -11,9 +11,12 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        coreLibraryDesugaringEnabled = true
+        isCoreLibraryDesugaringEnabled = true
+
+        
     }
 
     kotlinOptions {
@@ -21,11 +24,12 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.pelanggan_frontend"
+        applicationId = "com.gobox.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
     }
 
     buildTypes {
@@ -36,10 +40,10 @@ android {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-messaging")
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
 
 flutter {
